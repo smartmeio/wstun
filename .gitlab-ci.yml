@@ -1,0 +1,86 @@
+# Project:          WSTUN
+# Author:           Sergio Tomasello <sergio@smartme.io>
+# Created:          2019.06.27
+
+image: alpine:latest
+
+
+stages:
+  - start
+  #- package
+  #- upload
+  - cleanup
+
+#################################
+#######       START       #######
+#################################
+
+####### START
+start:
+  stage: start
+
+  variables:
+    GIT_STRATEGY: none
+
+  script:
+    - mkdir -p tmp
+    - echo `date +%Y-%m-%d` > tmp/date.tmp
+    - echo `date +%H-%M-%S` > tmp/time.tmp
+
+  artifacts:
+    paths:
+      - tmp/
+    expire_in: 1d
+
+  except:
+    - master
+
+######## PUSH
+push:
+  stage: start
+
+  allow_failure: true
+
+  variables:
+    GIT_STRATEGY: clone
+
+  script:
+    - apk add git
+    - git remote add github https://$GITHUB_BOT_USERNAME:$GITHUB_ACCESS_TOKEN@github.com/$GITHUB_DEST_REPO
+    #- git remote show github
+    #- git remote show origin
+    #- git branch -a
+    - git checkout $CI_COMMIT_REF_NAME
+    - git fetch github
+    - git push github $CI_COMMIT_REF_NAME --force
+    - git push github --tags
+
+  only:
+    - branches
+    - tags
+
+  except:
+    - master
+
+#################################
+#######      CLEANUP      #######
+#################################
+
+#######    Cleanup Job    #######
+cleanup:
+  stage: cleanup
+
+  variables:
+    GIT_STRATEGY: none
+
+  script:
+    - echo "Cleaning up"
+    - rm -rf tmp/
+
+  #when: always
+  only:
+    - branches
+    - tags
+
+  except:
+  - master
