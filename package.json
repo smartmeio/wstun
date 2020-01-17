@@ -8,7 +8,7 @@
     "postinstall": "./scripts/postinst"
   },
   "dependencies": {
-    "websocket": "<=1.0.28",
+    "websocket": "<=1.0.31",
     "optimist": "<=0.6.1",
     "node-uuid":"<=1.4.7",
     "under_score": "<=0.1.0",
